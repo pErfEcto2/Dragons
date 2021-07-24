@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include "iostream"
 using namespace std;
+using namespace sf;
 
 class Dragon{
   public:
@@ -27,12 +28,12 @@ class Dragon{
     sprite.scale(scale, scale);
     this->sprite = sprite;
   }
-
+  
   void setRectSourceSprite() {
-    sf::IntRect rectSourceSprite(top_axe, left_axe, size, size);
+    sf::IntRect rectSourceSprite(0, 0, size, size);
     this->rectSourceSprite = rectSourceSprite;
   }
-  
+
   void setSprite() {
     sf::Sprite sprite(texture, rectSourceSprite);
     this->sprite = sprite;
@@ -43,62 +44,85 @@ class Dragon{
     this->texture = texture;
   }
 
-  void controlDragon(sf::Event event) {
+  void controlDragon(sf::Event event, bool f) {
     float x_axe = sprite.getPosition().x;
     float y_axe = sprite.getPosition().y;
-    if (event.type == event.KeyPressed) {
-      if (event.key.code == sf::Keyboard::A) {
-            rectSourceSprite.top = 106;
-            x_axe -= 53;
+    if (f == true) {
+      if (event.type == event.KeyPressed) {
+        if (event.key.code == sf::Keyboard::A) {
+              rectSourceSprite.top = 106;
+              x_axe -= 20;
+              sprite.setPosition(x_axe, y_axe);
+              sprite.setRotation(90.f);
+          }
+        if (event.key.code == sf::Keyboard::D) {
+            rectSourceSprite.top = 212;
+            x_axe += 20;
             sprite.setPosition(x_axe, y_axe);
-
+            sprite.setRotation(-90.f);
         }
-      if (event.key.code == sf::Keyboard::D) {
-          rectSourceSprite.top = 212;
-          x_axe += 53;
-          sprite.setPosition(x_axe, y_axe);
-
+        if (event.key.code == sf::Keyboard::W) {
+            rectSourceSprite.top = 318;
+            y_axe -= 20;
+            sprite.setPosition(x_axe, y_axe);
+            sprite.setRotation(180.f);
+        }
+        if (event.key.code == sf::Keyboard::S) {
+            rectSourceSprite.top = 0;
+            y_axe += 20;
+            sprite.setPosition(x_axe, y_axe);
+            sprite.setRotation(0.f);
+        }
       }
-      if (event.key.code == sf::Keyboard::W) {
-          rectSourceSprite.top = 318;
-          y_axe -= 53;
-          sprite.setPosition(x_axe, y_axe);
+    }
+    else {
+      if (event.type == event.KeyPressed) {
+        if (event.key.code == sf::Keyboard::Left) {
+              rectSourceSprite.top = 106;
+              x_axe -= 20;
+              sprite.setPosition(x_axe, y_axe);
+              sprite.setRotation(90.f);
+          }
+        if (event.key.code == sf::Keyboard::Right) {
+            rectSourceSprite.top = 212;
+            x_axe += 20;
+            sprite.setPosition(x_axe, y_axe);
+            sprite.setRotation(-90);
+        }
+        if (event.key.code == sf::Keyboard::Up) {
+            rectSourceSprite.top = 318;
+            y_axe -= 20;
+            sprite.setPosition(x_axe, y_axe);
+            sprite.setRotation(180.f);
+        }
+        if (event.key.code == sf::Keyboard::Down) {
+            rectSourceSprite.top = 0;
+            y_axe += 20;
+            sprite.setPosition(x_axe, y_axe);
+            sprite.setRotation(0.f);
+        }
       }
-      if (event.key.code == sf::Keyboard::S) {
-          rectSourceSprite.top = 0;
-          y_axe += 53;
-          sprite.setPosition(x_axe, y_axe);
-      }
+    }
     this->sprite = sprite;
     this->rectSourceSprite = rectSourceSprite;
-    }
-  }
-    
-  void setAnim(float seconds) {
-    if (clock.getElapsedTime().asSeconds() > seconds){
-      if (rectSourceSprite.left == 212)
-        rectSourceSprite.left = 0;
-      else
-        rectSourceSprite.left += 106;
-      sprite.setTextureRect(rectSourceSprite);
-      clock.restart();
-      this->sprite = sprite;
-    }
   }
 };
 
-Dragon dragon_init(Dragon &dragon) {
+Dragon dragon_init(Dragon &dragon, bool f) {
   dragon.top_axe = 0;
   dragon.left_axe = 0;
   dragon.size = 106;
   dragon.scale = 2.f;
-  dragon.image = "dragon.png";
+  dragon.image = "test_9_9.png";
   dragon.setSourceSprite();
-  dragon.setRectSourceSprite();
+  //dragon.setRectSourceSprite();
   dragon.setSmoth(false);
   dragon.setSprite();
   dragon.setScale();
-  dragon.setAnim(0.2);
+  //dragon.setAnim(0.2);
+  dragon.sprite.setOrigin(5.f, 5.f);
+  if (f == true) dragon.sprite.setPosition(512.f, 256.f);
+  else dragon.sprite.setPosition(256.f, 256.f);
   return dragon;
 };
 
@@ -111,30 +135,47 @@ int music_init(sf::Music &main_theme, bool replay) {
 };
 
 int run_game() {
-  //sf::RenderWindow window(sf::VideoMode(1024, 512), "Dragons", sf::Style::Fullscreen);
-  sf::RenderWindow window(sf::VideoMode(1024, 512), "Dragons");
+  sf::RenderWindow window(sf::VideoMode(1024, 512), "Dragons", sf::Style::Fullscreen);
+  //sf::RenderWindow window(sf::VideoMode(1024, 512), "Dragons");
   sf::Event event;
   sf::Music main_theme;
   music_init(main_theme, true);
-  unsigned int microsecond = 10000;
+  unsigned int microsecond = 1000;
   
 
   Dragon first_dragon;
-  first_dragon = dragon_init(first_dragon);
+  first_dragon = dragon_init(first_dragon, true);
+
+  Dragon second_dragon;
+  second_dragon = dragon_init(second_dragon, false);
   
   while (window.isOpen()) {
     while (window.pollEvent(event)){
-      first_dragon.controlDragon(event);
+      first_dragon.controlDragon(event, true);
+      second_dragon.controlDragon(event, false);
       if (event.type == sf::Event::EventType::Closed) {
         window.close();
         return 0;
       }
     }
 
-    
+    sf::FloatRect hitbox1 = first_dragon.sprite.getGlobalBounds();
+    sf::FloatRect hitbox2 = second_dragon.sprite.getGlobalBounds();
+
+    if (first_dragon.sprite.getPosition().x < second_dragon.sprite.getPosition().x + hitbox2.width &&
+			  first_dragon.sprite.getPosition().x + hitbox1.width > second_dragon.sprite.getPosition().x &&
+			  first_dragon.sprite.getPosition().y < second_dragon.sprite.getPosition().y + hitbox2.height &&
+			  hitbox1.height + first_dragon.sprite.getPosition().y > second_dragon.sprite.getPosition().y) {
+          std::cout << "Collision Detected at " << std::endl;
+          std::cout << first_dragon.sprite.getPosition().x << std::endl;
+          std::cout << first_dragon.sprite.getPosition().y << std::endl;
+          first_dragon.sprite.setPosition(sf::Vector2f(200, 200));
+          second_dragon.sprite.setPosition(sf::Vector2f(1000, 500));
+    }
 
     window.clear(sf::Color::Green);
     window.draw(first_dragon.sprite);
+    window.draw(second_dragon.sprite);
     window.display();
     usleep(microsecond);
   }
