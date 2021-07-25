@@ -156,7 +156,6 @@ int main() {
 	
 			//ball collides with paddle
 			if(intersects(ball, paddle)) {
-
 				ballSpeed.y= -ballSpeed.y;
 			}
 	

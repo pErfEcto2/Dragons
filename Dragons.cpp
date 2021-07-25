@@ -8,39 +8,38 @@
 
 using namespace std;
 using namespace sf;
-
+// 
 bool intersects(Sprite & rect1, const RectangleShape & rect2) {
     FloatRect r1 = rect1.getGlobalBounds();
     FloatRect r2 = rect2.getGlobalBounds();
-    return r1.intersects (r2);
+    return r1.intersects(r2);
 }
 
 bool intersectsSprites(Sprite & sprite1, Sprite & sprite2) {
     FloatRect r1 = sprite1.getGlobalBounds();
     FloatRect r2 = sprite2.getGlobalBounds();
-    return r1.intersects (r2);
-}
-
-Sprite leftRightWallCollision(Sprite sprite1, Sprite sprite2) {
-    if (intersects(sprite1, sprite2)) {
-		FloatRect hitbox1 = sprite1.getGlobalBounds();
-		FloatRect hitbox2 = sprite2.getGlobalBounds();
-		d.x = clamp(d.x, leftWall.left + leftWall.width + 53, rightWall.left - sprite.getGlobalBounds().width + 25);
-		sprite.setPosition(d.x, d.y);
-    }
-    return sprite;
+    return r1.intersects(r2);
 }
 
 int clamp (const int x, const int a, const int b) {
 	return min(max(a, x), b);
 }
-
+/*
+void enemyCollision(Sprite sprite1, Sprite sprite2) {
+    if (intersectsSprites(sprite1, sprite2)) {
+		FloatRect hitbox1 = sprite1.getGlobalBounds();
+		FloatRect hitbox2 = sprite2.getGlobalBounds();
+		d.x = clamp(d.x, leftWall.left + leftWall.width + 53, rightWall.left - sprite.getGlobalBounds().width + 25);
+		sprite.setPosition(d.x, d.y);
+    }
+}
+*/
 Sprite leftRightWallCollision(Sprite sprite, RectangleShape left, RectangleShape right) {
     if (intersects(sprite, left) || intersects(sprite, right)) {
 		FloatRect leftWall = left.getGlobalBounds();
 		FloatRect rightWall = right.getGlobalBounds();
 		Vector2f d = sprite.getPosition();
-		d.x = clamp(d.x, leftWall.left + leftWall.width + 53, rightWall.left - sprite.getGlobalBounds().width + 25);
+		d.x = clamp(d.x, leftWall.left + leftWall.width + 33, rightWall.left - sprite.getGlobalBounds().width + 5);
 		sprite.setPosition(d.x, d.y);
     }
     return sprite;
@@ -51,7 +50,7 @@ Sprite topBottomWallCollision(Sprite sprite, RectangleShape top, RectangleShape 
         FloatRect topWall = top.getGlobalBounds();
 		FloatRect bottomWall = bottom.getGlobalBounds();
 		Vector2f d = sprite.getPosition();
-        d.y = clamp(d.y, topWall.top + topWall.width - 1308, bottomWall.top - sprite.getGlobalBounds().height + 29);
+        d.y = clamp(d.y, topWall.top + topWall.width - 1328, bottomWall.top - sprite.getGlobalBounds().height + 9);
         sprite.setPosition(d.x, d.y);
     }
     return sprite;
@@ -120,7 +119,7 @@ class Dragon {
         this->sprite = sprite;
     }
 
-    void control(Event event) {
+    void control(Event event, Sprite sprite2) {
         if (event.key.code == controlButtons[index - 1].left) {
             speed_x = -20;
         }
@@ -139,6 +138,9 @@ class Dragon {
         float new_coor_x = last_coor_x + speed_x;
         float new_coor_y = last_coor_y + speed_y;
         sprite.setPosition(new_coor_x, new_coor_y);
+        if (intersectsSprites(sprite, sprite2)) {
+            sprite.setPosition(last_coor_x, last_coor_y);
+        }
         speed_x = 0;
         speed_y = 0;
         this->sprite = sprite;
@@ -179,7 +181,7 @@ Dragon dragonInit(Dragon dragon) {
     dragon.top_axe = 0;
     dragon.left_axe = 0;
     dragon.size = 9;
-    dragon.scale = 10.f;
+    dragon.scale = 5.f;
     dragon.image = "test_9_9.png";
     dragon.setSourceSprite();
     dragon.setRectSourceSprite();
@@ -227,8 +229,8 @@ int main() {
     while (window.isOpen()) {
         while (window.pollEvent(event)){ // push action like key pressed to "event"
             if (event.KeyPressed) {
-                first_dragon.control(event);
-                second_dragon.control(event);
+                first_dragon.control(event, second_dragon.sprite);
+                second_dragon.control(event, first_dragon.sprite);
             }
             //second_dragon.control(event);
             if (event.type == sf::Event::EventType::Closed) {
@@ -240,7 +242,7 @@ int main() {
         first_dragon.sprite = topBottomWallCollision(first_dragon.sprite, top, bottom);
         second_dragon.sprite = leftRightWallCollision(second_dragon.sprite, left, right);
         second_dragon.sprite = topBottomWallCollision(second_dragon.sprite, top, bottom);
-
+        //enemyCollision(first_dragon.sprite, second_dragon.sprite);
 
         window.clear();
         window.draw(back);
