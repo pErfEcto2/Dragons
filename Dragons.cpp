@@ -8,23 +8,23 @@
 
 using namespace std;
 using namespace sf;
-// 
+// this fun returns "true" if rect2 crosses rect1
 bool intersects(Sprite & rect1, const RectangleShape & rect2) {
     FloatRect r1 = rect1.getGlobalBounds();
     FloatRect r2 = rect2.getGlobalBounds();
     return r1.intersects(r2);
 }
-
+// like "intersects", but with sprites
 bool intersectsSprites(Sprite & sprite1, Sprite & sprite2) {
     FloatRect r1 = sprite1.getGlobalBounds();
     FloatRect r2 = sprite2.getGlobalBounds();
     return r1.intersects(r2);
 }
-
+// 
 int clamp (const int x, const int a, const int b) {
 	return min(max(a, x), b);
 }
-
+// checks sprite crosses left or right wall
 Sprite leftRightWallCollision(Sprite sprite, RectangleShape left, RectangleShape right) {
     if (intersects(sprite, left) || intersects(sprite, right)) {
 		FloatRect leftWall = left.getGlobalBounds();
@@ -35,7 +35,7 @@ Sprite leftRightWallCollision(Sprite sprite, RectangleShape left, RectangleShape
     }
     return sprite;
 }
-
+// checks sprites crosses top or bottom wall
 Sprite topBottomWallCollision(Sprite sprite, RectangleShape top, RectangleShape bottom) {
     if (intersects(sprite, top) || intersects(sprite, bottom)) {
         FloatRect topWall = top.getGlobalBounds();
@@ -46,7 +46,7 @@ Sprite topBottomWallCollision(Sprite sprite, RectangleShape top, RectangleShape 
     }
     return sprite;
 }
-
+// struct with all dragon actions
 struct Controls {
     Keyboard::Key left, right, up, down;
 };
@@ -64,8 +64,9 @@ class Dragon {
         int size; // len of a square side of texture
         int speed_x = 0;
         int speed_y = 0;
-        uint32_t index;
-        int speed;
+        uint32_t index; // dragon index
+        int speed; // moving in pixels
+        // vector with controll buttons
         std::vector<Controls> controlButtons = {
             {
                 Keyboard::A, Keyboard::D, Keyboard::W, Keyboard::S
@@ -75,7 +76,7 @@ class Dragon {
             }
         };
         
-    
+    // set dragon index
     Dragon (uint32_t index_) : index{index_} {
     }
 
@@ -105,13 +106,12 @@ class Dragon {
         texture.setSmooth(f);
         this->texture = texture;
     }
-
+    //set orogin dot
     void set_origin() {
         sprite.setOrigin(size / 2, size / 2);
         this->sprite = sprite;
     }
-
-    void control(Event event, Sprite sprite2) {
+    void control(Event event, Sprite sprite2, RectangleShape shape1, RectangleShape shape2, RectangleShape shape3, RectangleShape shape4, RectangleShape shape5) {
         if (event.key.code == controlButtons[index - 1].left) {
             speed_x = -1 * speed;
         }
@@ -130,7 +130,13 @@ class Dragon {
         float new_coor_x = last_coor_x + speed_x;
         float new_coor_y = last_coor_y + speed_y;
         sprite.setPosition(new_coor_x, new_coor_y);
-        if (intersectsSprites(sprite, sprite2)) {
+        // if sprite crosses another sprite or obstacle sprite moves back
+        if (intersectsSprites(sprite, sprite2) || \
+            intersects(sprite, shape1) || \
+            intersects(sprite, shape2) || \
+            intersects(sprite, shape3) || \
+            intersects(sprite, shape4) || \
+            intersects(sprite, shape5)) {
             sprite.setPosition(last_coor_x, last_coor_y);
         }
         speed_x = 0;
@@ -193,56 +199,61 @@ Dragon dragonInit(Dragon dragon) {
 }
 
 int main() {
+    // define window resolution
     uint32_t display_width = VideoMode::getDesktopMode().width;
     uint32_t display_height = VideoMode::getDesktopMode().height;
     VideoMode resolution(display_width, display_height);
     RenderWindow window(resolution, "Dragons", Style::Fullscreen);
     Event event;
-    Music main_theme; // main music theme
+    Music main_theme;
     music_init(main_theme, true);
     uint32_t microsecond = 1000; // time in microseconds of delay
-    Texture backTexture;
-    Sprite back;
-    
-    if (!backTexture.loadFromFile("background.png")) return EXIT_FAILURE;
-    backTexture.setSmooth(true);
-    back.setTexture(backTexture);
-    back.setScale(2.f, 2.f);
+    Texture backTexture; // background texture
+    Sprite back; // background
 
-    auto first_dragon = Dragon(1);
-    first_dragon = dragonInit(first_dragon);
-    first_dragon.sprite.setPosition(276.9, 100.f);
-
-    auto second_dragon = Dragon(2);
-    second_dragon = dragonInit(second_dragon);
-    second_dragon.sprite.setPosition(400.f, 400.f);
-
-    RectangleShape top;
-    RectangleShape left;
-    RectangleShape right;
-	RectangleShape bottom;
     RectangleShape square1;
     RectangleShape square2;
     RectangleShape square3;
     RectangleShape square4;
-
-    square1 = doSquare(90, 171, 160);
-    square2 = doSquare(90, 171, 590);
-    square3 = doSquare(90, 1181, 160);
-    square4 = doSquare(90, 1181, 590);
-
+    RectangleShape square5;
+    RectangleShape top;
+    RectangleShape right;
+    RectangleShape left;
+    RectangleShape bottom;
+    square1 = doSquare(91, 171, 160);
+    square1.setFillColor(Color(114, 80, 12));
+    square2 = doSquare(91, 171, 590);
+    square2.setFillColor(Color(114, 80, 12));
+    square3 = doSquare(91, 1181, 160);
+    square3.setFillColor(Color(114, 80, 12));
+    square4 = doSquare(91, 1181, 590);
+    square4.setFillColor(Color(114, 80, 12));
+    square5 = doSquare(180, 676, 375);
+    square5.setFillColor(Color(114, 80, 12));
     top = top_init(top);
     left = left_init(left);
     right = right_init(right);
     bottom = bottom_init(bottom);
+    // background initializes 
+    if (!backTexture.loadFromFile("background.png")) return EXIT_FAILURE;
+    backTexture.setSmooth(true);
+    back.setTexture(backTexture);
+    back.setScale(2.f, 2.f);
+    // make first dragon
+    auto first_dragon = Dragon(1);
+    first_dragon = dragonInit(first_dragon);
+    first_dragon.sprite.setPosition(276.9, 100.f);
+    // do second dragon
+    auto second_dragon = Dragon(2);
+    second_dragon = dragonInit(second_dragon);
+    second_dragon.sprite.setPosition(400.f, 400.f);
 
     while (window.isOpen()) {
         while (window.pollEvent(event)){ // push action like key pressed to "event"
             if (event.KeyPressed) {
-                first_dragon.control(event, second_dragon.sprite);
-                second_dragon.control(event, first_dragon.sprite);
+                first_dragon.control(event, second_dragon.sprite, square1, square2, square3, square4, square5);
+                second_dragon.control(event, first_dragon.sprite, square1, square2, square3, square4, square5);
             }
-            //second_dragon.control(event);
             if (event.type == sf::Event::EventType::Closed) {
                 window.close();
                 return 0;
@@ -252,17 +263,17 @@ int main() {
         first_dragon.sprite = topBottomWallCollision(first_dragon.sprite, top, bottom);
         second_dragon.sprite = leftRightWallCollision(second_dragon.sprite, left, right);
         second_dragon.sprite = topBottomWallCollision(second_dragon.sprite, top, bottom);
-
+        //draw all
         window.clear();
         window.draw(back);
         window.draw(square1);
         window.draw(square2);
         window.draw(square3);
         window.draw(square4);
+        window.draw(square5);
         window.draw(first_dragon.sprite);
         window.draw(second_dragon.sprite);
         window.display();
         usleep(microsecond);
     }
-    return 0;
 }
