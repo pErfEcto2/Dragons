@@ -106,23 +106,22 @@ class Dragon {
         texture.setSmooth(f);
         this->texture = texture;
     }
-    //set orogin dot
-    void set_origin() {
-        sprite.setOrigin(size / 2, size / 2);
-        this->sprite = sprite;
-    }
     void control(Event event, Sprite sprite2, RectangleShape shape1, RectangleShape shape2, RectangleShape shape3, RectangleShape shape4, RectangleShape shape5) {
         if (event.key.code == controlButtons[index - 1].left) {
             speed_x = -1 * speed;
+            sprite.setRotation(-90);
         }
         else if (event.key.code == controlButtons[index - 1].right) {
             speed_x = speed;
+            sprite.setRotation(90);
         }
         else if (event.key.code == controlButtons[index - 1].up) {
             speed_y = -1 * speed;
+            sprite.setRotation(0);
         }
         else if (event.key.code == controlButtons[index - 1].down) {
             speed_y = speed;
+            sprite.setRotation(180);
         }
         
         float last_coor_x = sprite.getPosition().x;
@@ -185,16 +184,8 @@ RectangleShape doSquare(int sideLen, int x, int y) {
 Dragon dragonInit(Dragon dragon) {
     dragon.speed = 10;
     dragon.top_axe = 0;
-    dragon.left_axe = 0;
-    dragon.size = 9;
-    dragon.scale = 5.f;
-    dragon.image = "test_9_9.png";
-    dragon.setSourceSprite();
-    dragon.setRectSourceSprite();
-    dragon.setSmoth(false);
-    dragon.setSprite();
+    dragon.scale = 0.08;
     dragon.setScale();
-    dragon.set_origin();
     return dragon;
 }
 
@@ -242,11 +233,22 @@ int main() {
     // make first dragon
     auto first_dragon = Dragon(1);
     first_dragon = dragonInit(first_dragon);
-    first_dragon.sprite.setPosition(276.9, 100.f);
+    first_dragon.sprite.setPosition(70, 50);
+    first_dragon.sprite.setOrigin(633.5, 553.5);
+    first_dragon.sprite.setRotation(-90);
     // do second dragon
     auto second_dragon = Dragon(2);
     second_dragon = dragonInit(second_dragon);
-    second_dragon.sprite.setPosition(400.f, 400.f);
+    second_dragon.sprite.setPosition(1294, 738);
+    second_dragon.sprite.setOrigin(633.5, 553.5);
+    second_dragon.sprite.setRotation(90);
+
+    Texture texture;
+    if (!texture.loadFromFile("dragon.png", IntRect(0, 0, 1200, 1100))) {
+        cout << "Failed" << endl;
+    }
+    first_dragon.sprite.setTexture(texture);
+    second_dragon.sprite.setTexture(texture);
 
     while (window.isOpen()) {
         while (window.pollEvent(event)){ // push action like key pressed to "event"
