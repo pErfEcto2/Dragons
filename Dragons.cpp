@@ -106,22 +106,51 @@ class Dragon {
         texture.setSmooth(f);
         this->texture = texture;
     }
-    void control(Event event, Sprite sprite2, RectangleShape shape1, RectangleShape shape2, RectangleShape shape3, RectangleShape shape4, RectangleShape shape5) {
-        if (event.key.code == controlButtons[index - 1].left) {
-            speed_x = -1 * speed;
-            sprite.setRotation(-90);
-        }
-        else if (event.key.code == controlButtons[index - 1].right) {
-            speed_x = speed;
-            sprite.setRotation(90);
-        }
-        else if (event.key.code == controlButtons[index - 1].up) {
-            speed_y = -1 * speed;
-            sprite.setRotation(0);
-        }
-        else if (event.key.code == controlButtons[index - 1].down) {
-            speed_y = speed;
-            sprite.setRotation(180);
+    void control(Sprite sprite2, RectangleShape shape1, RectangleShape shape2, RectangleShape shape3, RectangleShape shape4, RectangleShape shape5) {
+        if (this->index == 1){
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+            {
+                speed_y = -speed;
+                sprite.setRotation(0);
+            }
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+            {
+                speed_x = -speed;
+                sprite.setRotation(-90);
+            }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+            {
+
+                speed_y = speed;
+                sprite.setRotation(180);
+            }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+            {
+                speed_x = speed;
+                sprite.setRotation(90);
+            }
+        } else {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+            {
+                speed_y = -speed;
+                sprite.setRotation(0);
+            }
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+            {
+                speed_x = -speed;
+                sprite.setRotation(-90);
+            }
+	    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+            {
+
+                speed_y = speed;
+                sprite.setRotation(180);
+            }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+            {
+                speed_x = speed;
+                sprite.setRotation(90);
+            }
         }
         
         float last_coor_x = sprite.getPosition().x;
@@ -253,8 +282,8 @@ int main() {
     while (window.isOpen()) {
         while (window.pollEvent(event)){ // push action like key pressed to "event"
             if (event.KeyPressed) {
-                first_dragon.control(event, second_dragon.sprite, square1, square2, square3, square4, square5);
-                second_dragon.control(event, first_dragon.sprite, square1, square2, square3, square4, square5);
+                first_dragon.control(second_dragon.sprite, square1, square2, square3, square4, square5);
+                second_dragon.control(first_dragon.sprite, square1, square2, square3, square4, square5);
             }
             if (event.type == sf::Event::EventType::Closed) {
                 window.close();
